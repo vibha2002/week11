@@ -1,23 +1,37 @@
-name: tfsec
-on:
-  push:
-    branches: [ prod, staging, dev ]
-  pull_request:
-    branches: [ prod ]
+provider "aws" {
+  region = "us-east-1"
+}
 
-jobs:
-  tfsec:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+resource "aws_security_group" "web_server" {
+  name        = "web_server_sg"
+  description = "Allow HTTP and HTTPS traffic"
 
-    - name: Run tfsec
-      uses: aquasecurity/tfsec@main
-      with:
-        soft_fail: true
-        
-    - name: Upload tfsec results
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: tfsec.sarif
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTP"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow HTTPS"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound"
+  }
+}
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound"
+  }
+}
